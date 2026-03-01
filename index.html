@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>マネ型サーチBox ワーク</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --social: #c2410c;
+    --market: #065f46;
+    --self: #1a365d;
+    --bg: #fafaf9;
+    --text: #1c1917;
+    --text-light: #57534e;
+    --font: "Yu Gothic", "Hiragino Sans", "Noto Sans JP", sans-serif;
+  }
+
+  html, body {
+    width: 100%;
+    min-height: 100vh;
+    background: var(--bg);
+    font-family: var(--font);
+    color: var(--text);
+  }
+
+  .container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 24px 16px 40px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .header .label {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--market);
+    margin-bottom: 8px;
+  }
+
+  .header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 6px;
+  }
+
+  .header p {
+    font-size: 13px;
+    color: var(--text-light);
+    line-height: 1.6;
+  }
+
+  .divider {
+    width: 40px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--social), var(--market));
+    border-radius: 2px;
+    margin: 12px auto;
+  }
+
+  /* Name input */
+  .name-section {
+    margin-bottom: 20px;
+  }
+
+  .name-section label {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--text-light);
+  }
+
+  .name-input {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 16px;
+    font-family: var(--font);
+    border: 2px solid #d6d3d1;
+    border-radius: 10px;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .name-input:focus {
+    border-color: var(--market);
+  }
+
+  /* Step cards */
+  .step-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    transition: box-shadow 0.2s;
+  }
+
+  .step-card:focus-within {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .step-title {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .step-hint {
+    font-size: 12px;
+    color: #a8a29e;
+    margin-bottom: 8px;
+    padding-left: 42px;
+  }
+
+  .step-textarea {
+    width: 100%;
+    min-height: 64px;
+    padding: 12px 14px;
+    font-size: 16px;
+    font-family: var(--font);
+    border: 2px solid #e7e5e4;
+    border-radius: 10px;
+    background: #fafaf9;
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.2s;
+    line-height: 1.6;
+  }
+
+  .step-textarea:focus {
+    border-color: var(--market);
+    background: #fff;
+  }
+
+  .step-textarea::placeholder {
+    color: #c8c5c2;
+  }
+
+  /* Impact check */
+  .impact-check {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #fff7ed;
+    border-radius: 10px;
+    border: 2px solid #fed7aa;
+    margin-top: 8px;
+  }
+
+  .impact-check label {
+    font-size: 14px;
+    color: var(--text);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .impact-check input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+    accent-color: var(--social);
+    cursor: pointer;
+  }
+
+  .impact-result {
+    display: none;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  .impact-result.show { display: block; }
+  .impact-ok {
+    background: #d1fae5;
+    color: var(--market);
+  }
+
+  /* Arrow between cards */
+  .step-arrow {
+    text-align: center;
+    font-size: 18px;
+    color: var(--market);
+    font-weight: 700;
+    margin: -4px 0;
+  }
+
+  /* Timer */
+  .timer-section {
+    text-align: center;
+    margin: 24px 0 16px;
+  }
+
+  .timer-display {
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 2px;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 12px;
+  }
+
+  .timer-display.warning { color: var(--social); }
+
+  .timer-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .btn {
+    padding: 10px 28px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: var(--font);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+
+  .btn:active { transform: scale(0.97); }
+
+  .btn-start {
+    background: var(--market);
+    color: #fff;
+  }
+
+  .btn-reset {
+    background: #e7e5e4;
+    color: var(--text-light);
+  }
+
+  /* Insight section */
+  .insight-box {
+    background: #d1fae5;
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  .insight-box h3 {
+    font-size: 15px;
+    color: var(--market);
+    margin-bottom: 8px;
+  }
+
+  .insight-box p {
+    font-size: 13px;
+    color: var(--text-light);
+    line-height: 1.7;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 12px;
+    color: #a8a29e;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <span class="label">WORKSHOP</span>
+    <h1>マネ型サーチBox 体験</h1>
+    <div class="divider"></div>
+    <p>最近あった「困ったこと」を1つ思い浮かべて、<br>順番に埋めてみてください。</p>
+  </div>
+
+  <div class="name-section">
+    <label>名前</label>
+    <input type="text" class="name-input" placeholder="名前を入力">
+  </div>
+
+  <!-- Step 1 -->
+  <div class="step-card" style="border-left: 4px solid var(--social);">
+    <div class="step-header">
+      <div class="step-num" style="background:var(--social);">1</div>
+      <span class="step-title">誰が</span>
+    </div>
+    <p class="step-hint">関係者は誰？（自分も含む）</p>
+    <textarea class="step-textarea" placeholder="例）新人の○○さん"></textarea>
+  </div>
+
+  <div class="step-arrow">&#8595;</div>
+
+  <!-- Step 2 -->
+  <div class="step-card" style="border-left: 4px solid var(--social);">
+    <div class="step-header">
+      <div class="step-num" style="background:var(--social);">2</div>
+      <span class="step-title">何が起きた</span>
+    </div>
+    <p class="step-hint">事実だけを書く（感情や解釈は入れない）</p>
+    <textarea class="step-textarea" placeholder="例）同じミスが3回続いた"></textarea>
+  </div>
+
+  <div class="step-arrow">&#8595;</div>
+
+  <!-- Step 3 -->
+  <div class="step-card" style="border-left: 4px solid var(--market);">
+    <div class="step-header">
+      <div class="step-num" style="background:var(--market);">3</div>
+      <span class="step-title">チームへの影響</span>
+    </div>
+    <p class="step-hint">チーム全体にどんな影響がある？ なければ「なし」</p>
+    <textarea class="step-textarea" id="impact-text" placeholder="例）他のメンバーのフォロー時間が増えた" oninput="checkImpact()"></textarea>
+    <div class="impact-check">
+      <input type="checkbox" id="impact-zero" onchange="toggleImpact()">
+      <label for="impact-zero">影響ゼロ（放置しても問題ない）</label>
+    </div>
+    <div class="impact-result impact-ok" id="impact-ok-msg">
+      &#10004; この課題は「放置OK」です。本当にやるべきことに集中しましょう
+    </div>
+  </div>
+
+  <div class="step-arrow">&#8595;</div>
+
+  <!-- Step 4 -->
+  <div class="step-card" id="step4" style="border-left: 4px solid var(--self);">
+    <div class="step-header">
+      <div class="step-num" style="background:var(--self);">4</div>
+      <span class="step-title">自責要因</span>
+    </div>
+    <p class="step-hint">この問題に対して、自分の責任はどこにある？</p>
+    <textarea class="step-textarea" placeholder="例）マニュアルの説明が不十分だった / 確認の頻度が足りなかった"></textarea>
+  </div>
+
+  <div class="step-arrow">&#8595;</div>
+
+  <!-- Step 5 -->
+  <div class="step-card" id="step5" style="border-left: 4px solid var(--market);">
+    <div class="step-header">
+      <div class="step-num" style="background:var(--market);">5</div>
+      <span class="step-title">使う型（アクション）</span>
+    </div>
+    <p class="step-hint">この課題に対して、どう動く？</p>
+    <textarea class="step-textarea" placeholder="例）1on1で期待値をすり合わせる / チェックリストを作る"></textarea>
+  </div>
+
+  <!-- Timer -->
+  <div class="timer-section">
+    <div class="timer-display" id="timer">3:00</div>
+    <div class="timer-buttons">
+      <button class="btn btn-start" id="btn-start" onclick="toggleTimer()">スタート</button>
+      <button class="btn btn-reset" onclick="resetTimer()">リセット</button>
+    </div>
+  </div>
+
+  <!-- Insight -->
+  <div class="insight-box">
+    <h3>このワークで気づくこと</h3>
+    <p>
+      &#10102; 「自分のせいだった」が意外と多い<br>
+      &#10103; 「放置でOK」な課題も意外と多い<br><br>
+      <strong style="color:var(--market);">本当にやるべきことだけに集中する</strong>
+    </p>
+  </div>
+
+  <div class="footer">
+    識学 &times; EVeM ハイブリッドマネジメント — 2026.3.5<br>
+    マネ型サーチBox — 大竹智博
+  </div>
+
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // Timer
+  let totalSeconds = 180;
+  let remaining = totalSeconds;
+  let interval = null;
+  let running = false;
+
+  const display = document.getElementById('timer');
+  const btn = document.getElementById('btn-start');
+
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return m + ':' + String(s).padStart(2, '0');
+  }
+
+  function updateDisplay() {
+    display.textContent = formatTime(remaining);
+    if (remaining <= 30) {
+      display.classList.add('warning');
+    } else {
+      display.classList.remove('warning');
+    }
+  }
+
+  window.toggleTimer = function() {
+    if (running) {
+      clearInterval(interval);
+      running = false;
+      btn.textContent = 'スタート';
+      btn.style.background = '#065f46';
+    } else {
+      if (remaining <= 0) return;
+      running = true;
+      btn.textContent = 'ストップ';
+      btn.style.background = '#c2410c';
+      interval = setInterval(function() {
+        remaining--;
+        updateDisplay();
+        if (remaining <= 0) {
+          clearInterval(interval);
+          running = false;
+          btn.textContent = 'スタート';
+          btn.style.background = '#065f46';
+          display.textContent = "0:00";
+          if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        }
+      }, 1000);
+    }
+  };
+
+  window.resetTimer = function() {
+    clearInterval(interval);
+    running = false;
+    remaining = totalSeconds;
+    updateDisplay();
+    btn.textContent = 'スタート';
+    btn.style.background = '#065f46';
+  };
+
+  // Impact zero toggle
+  window.toggleImpact = function() {
+    const cb = document.getElementById('impact-zero');
+    const msg = document.getElementById('impact-ok-msg');
+    const step4 = document.getElementById('step4');
+    const step5 = document.getElementById('step5');
+
+    if (cb.checked) {
+      msg.classList.add('show');
+      step4.style.opacity = '0.4';
+      step5.style.opacity = '0.4';
+    } else {
+      msg.classList.remove('show');
+      step4.style.opacity = '1';
+      step5.style.opacity = '1';
+    }
+  };
+
+  window.checkImpact = function() {};
+
+  updateDisplay();
+})();
+</script>
+
+</body>
+</html>
